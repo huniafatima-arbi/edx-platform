@@ -96,6 +96,7 @@ from openedx.core.djangoapps.django_comment_common.models import FORUM_ROLE_COMM
 from openedx.core.djangoapps.django_comment_common.utils import seed_permissions_roles
 from openedx.core.djangoapps.site_configuration import helpers as configuration_helpers
 from openedx.core.djangoapps.site_configuration.tests.mixins import SiteMixin
+from openedx.core.djangoapps.user_api.models import UserPreference
 from openedx.core.djangoapps.user_api.preferences.api import delete_user_preference
 from openedx.core.lib.teams_config import TeamsConfig
 from openedx.core.lib.xblock_utils import grade_histogram
@@ -294,7 +295,7 @@ class TestCommonExceptions400(TestCase):
     @ddt.data(True, False)
     def test_queue_connection_error(self, is_ajax):
         """
-        Tests that QueueConnectionError exception is handled in common_exception_400.
+        Tests that QueueConnectinError exception is handled in common_exception_400.
         """
         self.request.accepts("application/json").return_value = is_ajax
         resp = view_queue_connection_error(self.request)
@@ -474,6 +475,13 @@ class TestInstructorAPIDenyLevels(SharedModuleStoreTestCase, LoginEnrollmentTest
         CourseEnrollment.enroll(staff_member, self.course.id)
         CourseFinanceAdminRole(self.course.id).add_users(staff_member)
         CourseDataResearcherRole(self.course.id).add_users(staff_member)
+
+        staff_member.is_staff = True
+        staff_member.save()
+        UserPreference.objects.create(user=staff_member, key="preview-site-theme", value="test-theme")
+        UserPreference.objects.create(user=staff_member, key="pref-lang", value="en")
+
+
         self.client.login(username=staff_member.username, password=self.TEST_PASSWORD)
         # Try to promote to forums admin - not working
         # update_forum_role(self.course.id, staff_member, FORUM_ROLE_ADMINISTRATOR, 'allow')
@@ -2604,6 +2612,12 @@ class TestInstructorAPILevelsDataDump(SharedModuleStoreTestCase, LoginEnrollment
         status message when users request a CSV file of students who
         may enroll in a course.
         """
+        from openedx.core.djangoapps.user_api.models import UserPreference
+        self.instructor.is_staff = True
+        self.instructor.save()
+        UserPreference.objects.create(user=self.instructor, key="preview-site-theme", value="test-theme")
+        UserPreference.objects.create(user=self.instructor, key="pref-lang", value="en")
+
         url = reverse(
             'get_students_who_may_enroll',
             kwargs={'course_id': str(self.course.id)}
@@ -2780,6 +2794,12 @@ class TestInstructorAPILevelsDataDump(SharedModuleStoreTestCase, LoginEnrollment
         kwargs.update(extra_instructor_api_kwargs)
         url = reverse(instructor_api_endpoint, kwargs=kwargs)
         success_status = f"The {report_type} report is being created."
+        from openedx.core.djangoapps.user_api.models import UserPreference
+        self.instructor.is_staff = True
+        self.instructor.save()
+        UserPreference.objects.create(user=self.instructor, key="preview-site-theme", value="test-theme")
+        UserPreference.objects.create(user=self.instructor, key="pref-lang", value="en")
+
         with patch(task_api_endpoint) as mock_task_api_endpoint:
             if report_type == 'problem responses':
                 mock_task_api_endpoint.return_value = Mock(task_id='task-id-1138')

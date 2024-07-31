@@ -1522,7 +1522,28 @@ class GetStudentsWhoMayEnroll(APIView):
         Responds with JSON
             {"status": "... status message ..."}
         """
-        return Response({"status": 200})
+        course_key = CourseKey.from_string(course_id)
+        query_features = ['email']
+        report_type = _('enrollment')
+        task_api.submit_calculate_may_enroll_csv(request, course_key, query_features)
+        success_status = SUCCESS_MESSAGE_TEMPLATE.format(report_type=report_type)
+
+        return Response({"status": success_status})
+
+    # def get(self, request, *args, **kwargs):
+    #     """
+    #     Handle GET requests to return a 400 Bad Request status code.
+    #
+    #     Since this API only supports POST requests, any GET request will result
+    #     in a 400 Bad Request response.
+    #
+    #     Args:
+    #         request (HttpRequest): The HTTP request object.
+    #
+    #     Returns:
+    #         HttpResponse: A 400 Bad Request response.
+    #     """
+    #     return Response({'detail': 'GET method is not allowed for this endpoint.'}, status=status.HTTP_400_BAD_REQUEST)
 
 
 def _cohorts_csv_validator(file_storage, file_to_validate):

@@ -2612,7 +2612,6 @@ class TestInstructorAPILevelsDataDump(SharedModuleStoreTestCase, LoginEnrollment
         status message when users request a CSV file of students who
         may enroll in a course.
         """
-        from openedx.core.djangoapps.user_api.models import UserPreference
         self.instructor.is_staff = True
         self.instructor.save()
         UserPreference.objects.create(user=self.instructor, key="preview-site-theme", value="test-theme")

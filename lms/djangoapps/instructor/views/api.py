@@ -220,6 +220,8 @@ def require_course_permission(permission):
     """
     def decorator(func):
         def wrapped(*args, **kwargs):
+            import pdb;
+            pdb.set_trace()
             request = args[0]
             course = get_course_by_id(CourseKey.from_string(kwargs['course_id']))
 
@@ -780,6 +782,8 @@ def students_update_enrollment(request, course_id):  # lint-amnesty, pylint: dis
         ]
     }
     """
+    import pdb;
+    pdb.set_trace()
     course_id = CourseKey.from_string(course_id)
     action = request.POST.get('action')
     identifiers_raw = request.POST.get('identifiers')
@@ -1507,12 +1511,10 @@ class GetStudentsWhoMayEnroll(APIView):
         BearerAuthenticationAllowInactiveUser,
         SessionAuthenticationAllowInactiveUser,
     )
-    permission_classes = (IsAuthenticated,IsAdminUser)
+    permission_classes = (IsAuthenticated, IsAdminUser, permissions.InstructorPermission)
     permission_name = permissions.CAN_RESEARCH
-    http_method_names = ["post"]
 
     @method_decorator(ensure_csrf_cookie)
-    @method_decorator(common_exceptions_400)
     @method_decorator(transaction.non_atomic_requests)
     def post(self, request, course_id):
         """
@@ -1522,6 +1524,8 @@ class GetStudentsWhoMayEnroll(APIView):
         Responds with JSON
             {"status": "... status message ..."}
         """
+        import pdb;
+        pdb.set_trace()
         course_key = CourseKey.from_string(course_id)
         query_features = ['email']
         report_type = _('enrollment')
@@ -1530,20 +1534,20 @@ class GetStudentsWhoMayEnroll(APIView):
 
         return Response({"status": success_status})
 
-    # def get(self, request, *args, **kwargs):
-    #     """
-    #     Handle GET requests to return a 400 Bad Request status code.
-    #
-    #     Since this API only supports POST requests, any GET request will result
-    #     in a 400 Bad Request response.
-    #
-    #     Args:
-    #         request (HttpRequest): The HTTP request object.
-    #
-    #     Returns:
-    #         HttpResponse: A 400 Bad Request response.
-    #     """
-    #     return Response({'detail': 'GET method is not allowed for this endpoint.'}, status=status.HTTP_400_BAD_REQUEST)
+    def get(self, request, *args, **kwargs):
+        """
+        Handle GET requests to return a 400 Bad Request status code.
+
+        Since this API only supports POST requests, any GET request will result
+        in a 400 Bad Request response.
+
+        Args:
+            request (HttpRequest): The HTTP request object.
+
+        Returns:
+            HttpResponse: A 400 Bad Request response.
+        """
+        return Response({'detail': 'GET method is not allowed for this endpoint.'}, status=status.HTTP_400_BAD_REQUEST)
 
 
 def _cohorts_csv_validator(file_storage, file_to_validate):
@@ -1666,6 +1670,8 @@ def get_proctored_exam_results(request, course_id):
     """
     get the proctored exam resultsreport for the particular course.
     """
+    import pdb;
+    pdb.set_trace()
     course_key = CourseKey.from_string(course_id)
     report_type = _('proctored exam results')
     task_api.submit_proctored_exam_results_report(request, course_key)

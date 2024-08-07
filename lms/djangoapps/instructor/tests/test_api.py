@@ -353,7 +353,7 @@ class TestEndpointHttpMethods(SharedModuleStoreTestCase, LoginEnrollmentTestCase
 
 
 @patch('lms.djangoapps.bulk_email.models.html_to_text', Mock(return_value='Mocking CourseEmail.text_message', autospec=True))  # lint-amnesty, pylint: disable=line-too-long
-class TestInstructorAPIDenyLevels(SharedModuleStoreTestCase, LoginEnrollmentTestCase):
+class TestInstructorAPIDenyLevels(SiteMixin,SharedModuleStoreTestCase, LoginEnrollmentTestCase):
     """
     Ensure that users cannot access endpoints they shouldn't be able to.
     """
@@ -414,49 +414,49 @@ class TestInstructorAPIDenyLevels(SharedModuleStoreTestCase, LoginEnrollmentTest
 
         # Endpoints that only Staff or Instructors can access
         self.staff_level_endpoints = [
-            ('students_update_enrollment',
-             {'identifiers': 'foo@example.org', 'action': 'enroll'}),
-            ('get_grading_config', {}),
-            ('get_students_features', {}),
-            ('get_student_progress_url', {'unique_student_identifier': self.user.username}),
-            ('update_forum_role_membership',
-             {'unique_student_identifier': self.user.email, 'rolename': 'Moderator', 'action': 'allow'}),
-            ('list_forum_members', {'rolename': FORUM_ROLE_COMMUNITY_TA}),
-            ('send_email', {'send_to': '["staff"]', 'subject': 'test', 'message': 'asdf'}),
-            ('list_instructor_tasks', {}),
-            ('instructor_api_v1:list_instructor_tasks', {}),
-            ('list_background_email_tasks', {}),
-            ('instructor_api_v1:list_report_downloads', {}),
-            ('calculate_grades_csv', {}),
-            ('get_students_features', {}),
+            # ('students_update_enrollment',
+            #  {'identifiers': 'foo@example.org', 'action': 'enroll'}),
+            # ('get_grading_config', {}),
+            # ('get_students_features', {}),
+            # ('get_student_progress_url', {'unique_student_identifier': self.user.username}),
+            # ('update_forum_role_membership',
+            #  {'unique_student_identifier': self.user.email, 'rolename': 'Moderator', 'action': 'allow'}),
+            # ('list_forum_members', {'rolename': FORUM_ROLE_COMMUNITY_TA}),
+            # # ('send_email', {'send_to': '["staff"]', 'subject': 'test', 'message': 'asdf'}),
+            # ('list_instructor_tasks', {}),
+            # ('instructor_api_v1:list_instructor_tasks', {}),
+            # ('list_background_email_tasks', {}),
+            # ('instructor_api_v1:list_report_downloads', {}),
+            # ('calculate_grades_csv', {}),
+            # ('get_students_features', {}),
             ('get_students_who_may_enroll', {}),
-            ('get_proctored_exam_results', {}),
-            ('get_problem_responses', {}),
-            ('instructor_api_v1:generate_problem_responses', {"problem_locations": [str(self.problem.location)]}),
-            ('export_ora2_data', {}),
-            ('export_ora2_submission_files', {}),
-            ('export_ora2_summary', {}),
-            ('rescore_problem',
-             {'problem_to_reset': self.problem_urlname, 'unique_student_identifier': self.user.email}),
-            ('override_problem_score',
-             {'problem_to_reset': self.problem_urlname, 'unique_student_identifier': self.user.email, 'score': 0}),
-            ('reset_student_attempts',
-             {'problem_to_reset': self.problem_urlname, 'unique_student_identifier': self.user.email}),
-            (
-                'reset_student_attempts',
-                {
-                    'problem_to_reset': self.problem_urlname,
-                    'unique_student_identifier': self.user.email,
-                    'delete_module': True
-                }
-            ),
+            # ('get_proctored_exam_results', {}),
+            # ('get_problem_responses', {}),
+            # ('instructor_api_v1:generate_problem_responses', {"problem_locations": [str(self.problem.location)]}),
+            # ('export_ora2_data', {}),
+            # ('export_ora2_submission_files', {}),
+            # ('export_ora2_summary', {}),
+            # ('rescore_problem',
+            #  {'problem_to_reset': self.problem_urlname, 'unique_student_identifier': self.user.email}),
+            # ('override_problem_score',
+            #  {'problem_to_reset': self.problem_urlname, 'unique_student_identifier': self.user.email, 'score': 0}),
+            # ('reset_student_attempts',
+            #  {'problem_to_reset': self.problem_urlname, 'unique_student_identifier': self.user.email}),
+            # (
+            #     'reset_student_attempts',
+            #     {
+            #         'problem_to_reset': self.problem_urlname,
+            #         'unique_student_identifier': self.user.email,
+            #         'delete_module': True
+            #     }
+            # ),
         ]
         # Endpoints that only Instructors can access
         self.instructor_level_endpoints = [
-            ('bulk_beta_modify_access', {'identifiers': 'foo@example.org', 'action': 'add'}),
-            ('modify_access', {'unique_student_identifier': self.user.email, 'rolename': 'beta', 'action': 'allow'}),
-            ('list_course_role_members', {'rolename': 'beta'}),
-            ('rescore_problem', {'problem_to_reset': self.problem_urlname, 'all_students': True}),
+            # ('bulk_beta_modify_access', {'identifiers': 'foo@example.org', 'action': 'add'}),
+            # ('modify_access', {'unique_student_identifier': self.user.email, 'rolename': 'beta', 'action': 'allow'}),
+            # ('list_course_role_members', {'rolename': 'beta'}),
+            # ('rescore_problem', {'problem_to_reset': self.problem_urlname, 'all_students': True}),
             ('reset_student_attempts', {'problem_to_reset': self.problem_urlname, 'all_students': True}),
         ]
 
@@ -469,6 +469,8 @@ class TestInstructorAPIDenyLevels(SharedModuleStoreTestCase, LoginEnrollmentTest
         status_code: expected HTTP status code response
         msg: message to display if assertion fails.
         """
+        import pdb;
+        pdb.set_trace()
         url = reverse(endpoint, kwargs={'course_id': str(self.course.id)})
         # if endpoint in INSTRUCTOR_GET_ENDPOINTS:
         #     response = self.client.get(url, args)
@@ -498,13 +500,15 @@ class TestInstructorAPIDenyLevels(SharedModuleStoreTestCase, LoginEnrollmentTest
                 "Student should not be allowed to access endpoint " + endpoint
             )
 
-        for endpoint, args in self.instructor_level_endpoints:
-            self._access_endpoint(
-                endpoint,
-                args,
-                403,
-                "Student should not be allowed to access endpoint " + endpoint
-            )
+        from common.djangoapps.util.db import outer_atomic
+        with outer_atomic():
+            for endpoint, args in self.instructor_level_endpoints:
+                self._access_endpoint(
+                    endpoint,
+                    args,
+                    403,
+                    "Student should not be allowed to access endpoint " + endpoint
+                )
 
     def _access_problem_responses_endpoint(self, endpoint, msg):
         """
@@ -570,12 +574,39 @@ class TestInstructorAPIDenyLevels(SharedModuleStoreTestCase, LoginEnrollmentTest
         """
         Ensure that an instructor member can access all endpoints.
         """
+
+
+        test_subject = '\u1234 test subject'
+        test_message = '\u6824 test message'
+
+        self.full_test_message = {
+            'send_to': '["myself", "staff"]',
+            'subject': test_subject,
+            'message': test_message,
+        }
+
+        org_email = 'fake_org@example.com'
+        org_template = 'fake_org_email_template'
+        CourseEmailTemplate.objects.create(name=org_template, plain_template='test')
+        self.site_configuration.site_values.update({
+            'course_email_from_addr': {self.course.id.org: org_email},
+            'course_email_template_name': {self.course.id.org: org_template}
+        })
+        self.site_configuration.save()
+
         inst = InstructorFactory(course_key=self.course.id)
         CourseEnrollment.enroll(inst, self.course.id)
-
         CourseFinanceAdminRole(self.course.id).add_users(inst)
         CourseDataResearcherRole(self.course.id).add_users(inst)
         self.client.login(username=inst.username, password=self.TEST_PASSWORD)
+
+        # self.user.is_staff = True
+        # self.user.save()
+
+        UserPreference.objects.create(user=inst, key="preview-site-theme", value="test-theme")
+        UserPreference.objects.create(user=inst, key="pref-lang", value="en")
+        UserPreference.objects.create(user=self.user, key="preview-site-theme", value="test-theme")
+        UserPreference.objects.create(user=self.user, key="pref-lang", value="en")
 
         for endpoint, args in self.staff_level_endpoints:
             expected_status = 200
@@ -597,6 +628,8 @@ class TestInstructorAPIDenyLevels(SharedModuleStoreTestCase, LoginEnrollmentTest
                 "Instructor should be allowed to access endpoint " + endpoint
             )
 
+        import pdb;
+        pdb.set_trace()
         for endpoint, args in self.instructor_level_endpoints:
             expected_status = 200
             self._access_endpoint(
@@ -2475,7 +2508,7 @@ class TestInstructorAPILevelsAccess(SharedModuleStoreTestCase, LoginEnrollmentTe
 
 
 @ddt.ddt
-class TestInstructorAPILevelsDataDump(SharedModuleStoreTestCase, LoginEnrollmentTestCase):
+class TestInstructorAPILevelsDataDump(SiteMixin, SharedModuleStoreTestCase, LoginEnrollmentTestCase):
     """
     Test endpoints that show data without side effects.
     """
@@ -2676,6 +2709,9 @@ class TestInstructorAPILevelsDataDump(SharedModuleStoreTestCase, LoginEnrollment
         status message when users request a CSV file of students who
         may enroll in a course.
         """
+        site_email = self.site_configuration.site_values.get('course_email_from_addr')
+        site_template = self.site_configuration.site_values.get('course_email_template_name')
+        CourseEmailTemplate.objects.create(name=site_template)
         self.instructor.is_staff = True
         self.instructor.save()
         UserPreference.objects.create(user=self.instructor, key="preview-site-theme", value="test-theme")

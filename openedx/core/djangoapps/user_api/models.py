@@ -82,6 +82,8 @@ class UserPreference(models.Model):
             The user preference value, or default if one is not set.
         """
         try:
+            import pdb;
+            pdb.set_trace()
             user_preference = cls.objects.get(user=user, key=preference_key)
             return user_preference.value
         except cls.DoesNotExist:

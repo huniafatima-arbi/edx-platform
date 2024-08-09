@@ -5,7 +5,9 @@
 #    make upgrade
 #
 amqp==5.2.0
-    # via kombu
+    # via
+    #   -r scripts/user_retirement/requirements/base.txt
+    #   kombu
 asgiref==3.8.1
     # via
     #   -r scripts/user_retirement/requirements/base.txt
@@ -54,6 +56,8 @@ cryptography==43.0.0
     #   pyjwt
 ddt==1.7.2
     # via -r scripts/user_retirement/requirements/testing.in
+defusedxml==0.7.1
+    # via -r scripts/user_retirement/requirements/base.txt
 django==4.2.15
     # via
     #   -r scripts/user_retirement/requirements/base.txt
@@ -119,7 +123,7 @@ jmespath==1.0.1
     #   boto3
     #   botocore
 kombu==5.4.0
-    # via -r scripts/user_retirement/requirements/testing.in
+    # via -r scripts/user_retirement/requirements/base.txt
 lxml==4.9.4
     # via
     #   -r scripts/user_retirement/requirements/base.txt
@@ -284,6 +288,7 @@ urllib3==1.26.19
     #   responses
 vine==5.1.0
     # via
+    #   -r scripts/user_retirement/requirements/base.txt
     #   amqp
     #   kombu
 werkzeug==3.0.3

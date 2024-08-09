@@ -6,4 +6,3 @@ requests_mock
 responses
 mock
 ddt
-kombu
